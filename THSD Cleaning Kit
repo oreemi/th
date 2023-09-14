@@ -1,0 +1,158 @@
+@echo off
+
+:mainmenu 
+cls 
+
+
+echo " ______  ____  ___  ___  ___ __  __  ____  ___  __    ______ __  __                                                                    ";
+echo " | || | ||    // \\ ||\\//|| ||  || ||    // \\ ||    | || | ||  ||                                                                    ";
+echo "   ||   ||==  ||=|| || \/ || ||==|| ||==  ||=|| ||      ||   ||==||                                                                    ";
+echo "   ||   ||___ || || ||    || ||  || ||___ || || ||__|   ||   ||  ||                                                                    ";
+echo "                                                                                                                                       ";
+echo "  __   ____ ____  __ __ __   ___  ____    ____    ____  __  __ __      ___ __     ____  ___  __  __ __ __  __   ___     __ __ __ ______";
+echo " (( \ ||    || \\ || || ||  //   ||       || \\  ||    (( \ || //     //   ||    ||    // \\ ||\ || || ||\ ||  // \\    || // || | || |";
+echo "  \\  ||==  ||_// \\ // || ((    ||==     ||  )) ||==   \\  ||<<     ((    ||    ||==  ||=|| ||\\|| || ||\\|| (( ___    ||<<  ||   ||  ";
+echo " \_)) ||___ || \\  \V/  ||  \\__ ||___    ||_//  ||___ \_)) || \\     \\__ ||__| ||___ || || || \|| || || \||  \\_||    || \\ ||   ||  ";
+echo "                                                                                                                                       ";
+
+echo ********************* 
+echo * Cleaing Kit Menu *
+echo ********************* 
+echo * 1. Start Cleaning Kit * 
+echo * 2. About Cleaning Kit * 
+echo ********************* 
+choice /C:12 >nul
+
+if %errorlevel% equ 1 goto p1 if %errorlevel% equ 2 goto about
+
+REM -----INFO-----
+:about
+echo *********************
+echo * The first phase of this batch file deletes most common temp files stored on the windows install directory. It will not clean files in use by TH services & applications. It will not delete files or folders that are prohibited to access.*
+echo * The second phase deletes Browsing Data for Google Chrome and Microsoft Edge*
+echo * The third phase flushes the DNS*
+echo * The fourth phase runs the Disk Cleanup utility, upon request*
+echo * The final phase delete the user Downloads folder, upon request*
+echo *********************
+echo * Written by Emilio Orengo*
+echo * 9/13/2023*
+echo *********************
+pause
+goto mainmenu
+
+REM -----CLEANUP-----
+:p1
+
+@echo off
+
+echo Starting Phase One: cleaning system junk files...
+echo Please wait…
+
+del /f /s /q %systemdrive%\*.tmp
+del /f /s /q %systemdrive%\*._mp
+del /f /s /q %systemdrive%\*.log
+del /f /s /q %systemdrive%\*.gid
+del /f /s /q %systemdrive%\*.chk
+del /f /s /q %systemdrive%\*.old
+del /f /s /q %systemdrive%\recycled\*.*
+del /f /s /q %windir%\*.bak
+del /f /s /q %windir%\prefetch\*.*
+rd /s /q %windir%\temp & md %windir%\temp
+del /f /s /q “%userprofile%\Local Settings\Temporary Internet Files\*.*”
+del /f /s /q “%userprofile%\Local Settings\Temp\*.*”
+del /f /s /q “%userprofile%\recent\*.*”
+echo Phase One complete!
+echo Initializing Phase Two...
+timeout /t 3 /nobreak
+
+:p2
+echo Starting Phase Two: Cleaning Browsing Data for Google Chrome and Microsoft Edge...
+echo Please Wait...
+timeout /t 1 /nobreak
+echo Deleting Chrome Cache and Browsing History...
+del /f /s /q "%userprofile%\AppData\Local\Google\Chrome\User Data\Default\Cache\*.*"
+rd /s /q %userprofile%\AppData\Local\Google\Chrome\User Data\Default\Cache
+del /f /s /q "%userprofile%AppData\Local\Google\Chrome\User Data\Default\History"
+echo Deletion Complete!
+timeout /t 1 /nobreak
+echo Deleting Edge Cache, Data and Browsing History...
+del /f /s /q "%userprofile%\AppData\Local\Microsoft\Edge\User Data\Default\Cache\*.*"
+rd /s /q %userprofile%\AppData\Local\Microsoft\Edge\User Data\Default\Cache
+del /f /s /q "%userprofile%\AppData\Local\Microsoft\Edge\User Data\Default\History"
+del /f /s /q "%userprofile%\AppData\Local\Microsoft\Edge\User Data\Default\Web Data"
+echo Deletion Complete!
+timeout /t 1 /nobreak
+echo Phase Two complete!
+echo Initializing Phase Three...
+timeout /t 3 /nobreak
+
+:p3
+echo Starting Phase Three: Flushing DNS...
+echo Please Wait...
+timeout /t 1 /nobreak
+ipconfig /flushdns
+echo Flush Complete!
+timeout /t 1 /nobreak
+echo Phase Three complete!
+echo Initializing Phase Four...
+timeout /t 3 /nobreak
+
+:p4
+echo Starting Phase Four: Executing Disk Cleanup...
+echo Please choose:
+echo ********************* 
+echo * Do You Want to Run the WinOS Disk Cleanup Utility?*
+echo ********************* 
+echo * Yes * 
+echo * No * 
+echo ********************* 
+choice /C:YN >nul
+
+if %errorlevel% equ Y goto run if %errorlevel% equ N goto final
+
+:run
+cleanmgr
+echo Phase Four complete!
+echo Initializing Final Phase...
+timeout /t 3 /nobreak
+
+:final
+echo Starting Final Phase: Downloads Folder Deletion
+echo Please choose:
+echo ********************* 
+echo * Do You Want to Delete Your Downloads Folder?*
+echo ********************* 
+echo * Yes * 
+echo * No * 
+echo ********************* 
+choice /C:YN >nul
+
+if %errorlevel% equ Y goto dd if %errorlevel% equ N goto end
+
+:dd
+echo Deleting Downloads...
+echo Please Wait...
+timeout /t 1 /nobreak
+del /f /s /q "%userprofile%\Downloads"
+rd /s /q %userprofile%\Downloads & md %userprofile%\Downloads
+echo Deletion Complete!
+timeout /t 3 /nobreak
+REM -----END CLEANUP-----
+
+echo.
+echo Final Phase Complete. Cleaning Kit is finished!
+timeout /t 1
+goto end
+
+REM echo.: Displays a single blank line on the screen.
+
+:end
+pause 
+goto mainmenu 
+
+REM /f: force deleting of read-only files
+REM /s: Delete specified files from all subdirectories.
+REM /q: Quiet mode, do not ask if ok to delete on global wildcard
+REM %systemdrive%: drive upon which the system folder was placed
+REM %windir%: a regular variable and is defined in the variable store as %SystemRoot%. 
+REM %userprofile%: variable to find the directory structure owned by the user running the process
